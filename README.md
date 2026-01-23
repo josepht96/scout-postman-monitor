@@ -1,5 +1,7 @@
 # Scout - Postman Test Monitoring
 
+## Note: Image is not yet published. Use `make rebuild-scout` to build and run locally
+
 Scout is a monitoring tool that executes Postman collections using Newman, stores test results in PostgreSQL, exposes Prometheus metrics, and provides a simple web UI for visualization.
 
 ## Features
