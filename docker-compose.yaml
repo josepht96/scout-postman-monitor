@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: scout-postgres
+    environment:
+      POSTGRES_DB: scout
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - scout-network
+
+  scout:
+    build:
+      context: .
+      dockerfile: deployments/Dockerfile
+    container_name: scout
+    environment:
+      DATABASE_URL: "postgres://postgres:postgres@postgres:5432/scout?sslmode=disable"
+      COLLECTIONS_DIR: /app/collections
+      NEWMAN_SCRIPT_PATH: /app/newman/executor.js
+      INTERVAL: "30s"
+      PORT: "8080"
+      example_test_DELAY_TIME: "5"
+      example_dev_DELAY_TIME: "1"
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount local collections directory to container
+      - ./collections:/app/collections:ro
+      # Optional: Mount web directory for development (hot reload UI changes)
+      - ./web:/app/web:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - scout-network
+    restart: unless-stopped
+
+networks:
+  scout-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

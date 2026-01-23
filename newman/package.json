@@ -1,0 +1,15 @@
+{
+  "name": "scout-newman-executor",
+  "version": "1.0.0",
+  "description": "Newman executor for Scout",
+  "main": "executor.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["newman", "postman", "testing"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "newman": "^6.1.3"
+  }
+}

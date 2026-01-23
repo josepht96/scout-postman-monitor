@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scout-config
+  labels:
+    app: scout
+data:
+  INTERVAL: "30s"
+  PORT: "8080"
+  COLLECTIONS_DIR: "/app/collections"
+  NEWMAN_SCRIPT_PATH: "/app/newman/executor.js"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scout-collections
+  labels:
+    app: scout
+data:
+  # Example collection - replace with your actual collections
+  # You can also mount collections from a PersistentVolume or ConfigMap
+  .gitkeep: ""

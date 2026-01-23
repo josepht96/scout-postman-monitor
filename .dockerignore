@@ -1,0 +1,54 @@
+# Binaries
+scout
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Dependencies (will be installed in container)
+node_modules
+
+# Build artifacts
+dist
+bin
+
+# Documentation
+*.md
+!README.md
+
+# Docker
+docker-compose.yaml
+Dockerfile
+.dockerignore
+
+# Kubernetes
+deployments/kubernetes
+
+# Test files
+*_test.go
+*.test
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.sqlite
+
+# Logs
+*.log

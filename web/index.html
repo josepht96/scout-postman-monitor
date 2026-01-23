@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scout - Postman Monitor</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #e5e7eb;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0px 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #2d2f31 0%, #2d2f31 100%);
+            padding: 5px 0;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        h1 {
+            font-size: 1.25em;
+            margin-bottom: 0px;
+        }
+
+        .main-header {
+            font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 2.5em;
+            margin-bottom: 0px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        /* Individual letter colors for Scout */
+        .letter-orange {
+            color: #bb690c;
+        }
+
+        .letter-magenta {
+            color: #c237a1;
+        }
+
+        .letter-darkblue {
+            color: #3b65d9;
+        }
+
+        .letter-darkgreen {
+            color: #1b8744;
+        }
+
+        .letter-lightblue {
+            color: #2c94c1;
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 0.44em;
+            font-weight: bold;
+            margin-left: 15px;
+        }
+
+        .overview-section {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .stat-card {
+            background: #2d2d2d;
+            padding: 8px 12px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #9ca3af;
+            white-space: nowrap;
+        }
+
+        .stat-value {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .stat-value.success {
+            color: #10b981;
+        }
+
+        .stat-value.failed {
+            color: #ef4444;
+        }
+
+        .stat-value.total {
+            color: #667eea;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+        }
+
+        button {
+            background: #4a537e;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.3s;
+            min-width: 120px;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .collection {
+            background: #2d2d2d;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .collection-header {
+            padding: 10px;
+            border-bottom: 1px solid #404040;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .collection-header:hover {
+            background: #3a3a3a;
+        }
+
+        .collection-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .collapse-icon {
+            display: inline-block;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid #667eea;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .collection.collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+
+        .collection-content {
+            max-height: 5000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+
+        .collection.collapsed .collection-content {
+            max-height: 0;
+        }
+
+        .collection-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .collection-status.passed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .collection-status.failed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .collection-status.partial {
+            background: #ece9b2;
+            color: #514d09;
+        }
+
+        .collection-status.pending {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .collection-meta {
+            padding: 15px 20px;
+            background: #252525;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            font-size: 0.9em;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .meta-label {
+            color: #9ca3af;
+            font-size: 0.85em;
+        }
+
+        .meta-value {
+            font-weight: 600;
+            color: #e5e7eb;
+        }
+
+        .tests-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .tests-table th {
+            background: #252525;
+            padding: 12px 20px;
+            text-align: left;
+            font-weight: 600;
+            color: #e5e7eb;
+            font-size: 0.9em;
+        }
+
+        .tests-table td {
+            padding: 12px 20px;
+            border-top: 1px solid #404040;
+        }
+
+        .test-name {
+            font-weight: 500;
+        }
+
+        .test-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .test-status.pass {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .test-status.fail {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .last-updated {
+            text-align: center;
+            color: #6b7280;
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9ca3af;
+        }
+
+        .refresh-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(100deg, #34b673 0%, #bad123 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .refresh-indicator.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .refresh-indicator svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .refresh-indicator.active svg {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .overview-section {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .stats {
+                flex-wrap: wrap;
+            }
+
+            .controls {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Refresh Indicator -->
+    <div class="refresh-indicator" id="refreshIndicator">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+        </svg>
+    </div>
+
+    <header>
+        <div class="container">
+            <h1 class="main-header">
+                <span class="letter-orange">S</span><span class="letter-magenta">c</span><span class="letter-darkblue">o</span><span class="letter-darkgreen">u</span><span class="letter-lightblue">t</span>
+                <span class="subtitle">Postman Monitoring Dashboard</span>
+            </h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="overview-section">
+            <div class="stats" id="stats"></div>
+
+            <div class="controls">
+                <button onclick="runTests()" id="runBtn">Run Tests Now</button>
+                <button onclick="loadData()">Refresh</button>
+            </div>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="loading" class="loading">Loading...</div>
+        <div id="collections"></div>
+        <div id="lastUpdated" class="last-updated"></div>
+    </div>
+
+    <script>
+        let autoRefreshInterval;
+        let collapsedCollections = new Set(); // Track which collections are collapsed
+        let isInitialLoad = true; // Track if this is the first page load
+
+        async function loadData() {
+            // Save current collapsed state before refresh
+            saveCollapsedState();
+
+            // Show refresh indicator
+            const indicator = document.getElementById('refreshIndicator');
+            indicator.classList.add('active');
+
+            try {
+                const response = await fetch('/api/results');
+                if (!response.ok) throw new Error('Failed to fetch results');
+
+                const data = await response.json();
+                renderData(data);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'none';
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').textContent = 'Error loading data: ' + error.message;
+                document.getElementById('error').style.display = 'block';
+            } finally {
+                // Hide refresh indicator after 2 second
+                setTimeout(() => {
+                    indicator.classList.remove('active');
+                }, 2000);
+            }
+        }
+
+        async function runTests() {
+            const btn = document.getElementById('runBtn');
+            btn.disabled = true;
+            btn.textContent = 'Running...';
+
+            try {
+                const response = await fetch('/api/run', { method: 'POST' });
+                if (!response.ok) throw new Error('Failed to trigger test run');
+
+                // Wait a bit, then reload
+                setTimeout(() => {
+                    loadData();
+                    btn.disabled = false;
+                    btn.textContent = 'Run Tests Now';
+                }, 3000);
+            } catch (error) {
+                console.error('Error running tests:', error);
+                alert('Failed to run tests: ' + error.message);
+                btn.disabled = false;
+                btn.textContent = 'Run Tests Now';
+            }
+        }
+
+        function renderData(data) {
+            renderStats(data);
+            renderCollections(data);
+
+            const updated = new Date(data.updated_at);
+            document.getElementById('lastUpdated').textContent =
+                'Last updated: ' + updated.toLocaleString();
+        }
+
+        function renderStats(data) {
+            let totalTests = 0;
+            let passedTests = 0;
+            let failedTests = 0;
+            let collectionsCount = 0;
+
+            data.environment_groups.forEach(group => {
+                collectionsCount += group.collections.length;
+                group.collections.forEach(col => {
+                    if (col.execution) {
+                        totalTests += col.execution.total_tests;
+                        passedTests += col.execution.passed_tests;
+                        failedTests += col.execution.failed_tests;
+                    }
+                });
+            });
+
+            const statsHtml = `
+                <div class="stat-card">
+                    <span class="stat-label">Collections:</span>
+                    <span class="stat-value total">${collectionsCount}</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Tests:</span>
+                    <span class="stat-value total">${totalTests}</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Passed:</span>
+                    <span class="stat-value success">${passedTests}</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Failed:</span>
+                    <span class="stat-value failed">${failedTests}</span>
+                </div>
+            `;
+
+            document.getElementById('stats').innerHTML = statsHtml;
+        }
+
+        function renderCollections(data) {
+            const container = document.getElementById('collections');
+
+            if (data.environment_groups.length === 0) {
+                container.innerHTML = '<div class="no-data">No collections found. Add Postman collections to subdirectories in the collections directory.</div>';
+                return;
+            }
+
+            const html = data.environment_groups.map(group => {
+                // Build environment header if present
+                const envHeader = group.environment ? `
+                    <div style="padding: 8px 0; margin-bottom: 15px; border-bottom: 2px solid #404040; font-weight: 600; font-size: 1.1em; color: #e5e7eb;">
+                        ${group.directory} / ${group.environment.name}
+                    </div>
+                ` : `
+                    <div style="padding: 8px 0; margin-bottom: 15px; border-bottom: 2px solid #404040; font-weight: 600; font-size: 1.1em; color: #e5e7eb;">
+                        ${group.directory}
+                    </div>
+                `;
+
+                const collectionsHtml = '<div style="margin-left: 0px;">' + group.collections.map(col => {
+                if (!col.execution) {
+                    return `
+                        <div class="collection" data-collection-id="${col.collection.id}">
+                            <div class="collection-header" onclick="toggleCollection(this)">
+                                <div class="collection-title">
+                                    <span class="collapse-icon"></span>
+                                    ${col.collection.name}
+                                </div>
+                                <div class="collection-status pending">Pending</div>
+                            </div>
+                            <div class="collection-content">
+                                <div class="collection-meta">
+                                    <div class="meta-item">
+                                        <span class="meta-label">Status</span>
+                                        <span class="meta-value">No executions yet</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                const exec = col.execution;
+                let status = 'passed';
+                if (exec.failed_tests > 0 && exec.passed_tests > 0) {
+                    status = 'partial';
+                } else if (exec.failed_tests > 0) {
+                    status = 'failed';
+                }
+                const started = new Date(exec.started_at);
+                const duration = (exec.duration_ms / 1000).toFixed(2);
+
+                const testsHtml = col.results.length > 0 ? `
+                    <table class="tests-table">
+                        <thead>
+                            <tr>
+                                <th>Test Name</th>
+                                <th>Status</th>
+                                <th>Method</th>
+                                <th>URL</th>
+                                <th>Response Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${col.results.map(test => `
+                                <tr>
+                                    <td class="test-name">${test.test_name}</td>
+                                    <td><span class="test-status ${test.passed ? 'pass' : 'fail'}">${test.passed ? 'PASS' : 'FAIL'}</span></td>
+                                    <td>${test.method || '-'}</td>
+                                    <td>${test.url ? truncateUrl(test.url) : '-'}</td>
+                                    <td>${test.response_time_ms ? test.response_time_ms + 'ms' : '-'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                ` : '';
+
+                return `
+                    <div class="collection" data-collection-id="${col.collection.id}">
+                        <div class="collection-header" onclick="toggleCollection(this)">
+                            <div class="collection-title">
+                                <span class="collapse-icon"></span>
+                                ${col.collection.name}
+                            </div>
+                            <div class="collection-status ${status}">${status.toUpperCase()}</div>
+                        </div>
+                        <div class="collection-content">
+                            <div class="collection-meta">
+                                <div class="meta-item">
+                                    <span class="meta-label">Last Run</span>
+                                    <span class="meta-value">${started.toLocaleString()}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Last Successful Run</span>
+                                    <span class="meta-value">${col.last_success_execution ? new Date(col.last_success_execution.started_at).toLocaleString() : 'Never'}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Duration</span>
+                                    <span class="meta-value">${duration}s</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Total Tests</span>
+                                    <span class="meta-value">${exec.total_tests}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Passed</span>
+                                    <span class="meta-value" style="color: #10b981;">${exec.passed_tests}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span class="meta-label">Failed</span>
+                                    <span class="meta-value" style="color: #ef4444;">${exec.failed_tests}</span>
+                                </div>
+                            </div>
+                            ${testsHtml}
+                        </div>
+                    </div>
+                `;
+                }).join('') + '</div>';
+
+                return envHeader + collectionsHtml;
+            }).join('');
+
+            container.innerHTML = html;
+
+            // Restore collapsed state after re-rendering
+            restoreCollapsedState();
+        }
+
+        function truncateUrl(url, maxLength = 50) {
+            if (url.length <= maxLength) return url;
+            return url.substring(0, maxLength) + '...';
+        }
+
+        function saveCollapsedState() {
+            collapsedCollections.clear();
+            document.querySelectorAll('.collection.collapsed').forEach(el => {
+                const id = el.getAttribute('data-collection-id');
+                if (id) collapsedCollections.add(id);
+            });
+        }
+
+        function restoreCollapsedState() {
+            // If this is initial load, collapse everything
+            if (isInitialLoad) {
+                document.querySelectorAll('.collection').forEach(el => {
+                    el.classList.add('collapsed');
+                    const id = el.getAttribute('data-collection-id');
+                    if (id) collapsedCollections.add(id);
+                });
+                isInitialLoad = false; // Mark that initial load is complete
+            } else {
+                // Restore saved collapsed state
+                collapsedCollections.forEach(id => {
+                    const element = document.querySelector(`.collection[data-collection-id="${id}"]`);
+                    if (element) {
+                        element.classList.add('collapsed');
+                    }
+                });
+            }
+        }
+
+        function toggleCollection(headerElement) {
+            const collectionElement = headerElement.parentElement;
+            const id = collectionElement.getAttribute('data-collection-id');
+            collectionElement.classList.toggle('collapsed');
+
+            if (collectionElement.classList.contains('collapsed')) {
+                collapsedCollections.add(id);
+            } else {
+                collapsedCollections.delete(id);
+            }
+        }
+
+        // Load data on page load
+        loadData();
+
+        // Auto-refresh every 30 seconds
+        autoRefreshInterval = setInterval(loadData, 30000);
+    </script>
+</body>
+</html>
