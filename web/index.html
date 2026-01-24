@@ -213,13 +213,13 @@
         }
 
         .collection-status.passed {
-            background: #d1fae5;
-            color: #065f46;
+            background: #1b8744;
+            color: #b0f3b8;
         }
 
         .collection-status.failed {
-            background: #fee2e2;
-            color: #991b1b;
+            background: #b73434;
+            color: #f0c6c6;
         }
 
         .collection-status.partial {
@@ -285,16 +285,18 @@
             border-radius: 12px;
             font-size: 0.8em;
             font-weight: 600;
+            width: 50px;
+            text-align: center;
         }
 
         .test-status.pass {
-            background: #d1fae5;
-            color: #065f46;
+            background: #1b8744;
+            color: #b0f3b8;
         }
 
         .test-status.fail {
-            background: #fee2e2;
-            color: #991b1b;
+            background: #b73434;
+            color: #f0c6c6;
         }
 
         .loading {
@@ -330,7 +332,7 @@
             right: 20px;
             width: 40px;
             height: 40px;
-            background: linear-gradient(100deg, #34b673 0%, #bad123 100%);
+            background: linear-gradient(100deg, #1b8744 0%, #1b8744 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -564,9 +566,7 @@
 
                 const exec = col.execution;
                 let status = 'passed';
-                if (exec.failed_tests > 0 && exec.passed_tests > 0) {
-                    status = 'partial';
-                } else if (exec.failed_tests > 0) {
+                if (exec.failed_tests > 0) {
                     status = 'failed';
                 }
                 const started = new Date(exec.started_at);

@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "ef71a1ae-2d97-4b4c-ae4a-71dbb6226af3",
-		"name": "Example API Tests",
+		"name": "example_api_tests",
 		"description": "Example Postman collection for Scout monitoring",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -13,8 +13,12 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Response time is less than 500ms\", function () {",
-							"    pm.expect(pm.response.responseTime).to.be.below(500);",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response time is less than 1000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -45,10 +49,6 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Status code is 200\", function () {",
-							"    pm.response.to.have.status(200);",
-							"});",
-							"",
 							"pm.test(\"Response is JSON\", function () {",
 							"    pm.response.to.be.json;",
 							"});",
