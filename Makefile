@@ -1,4 +1,4 @@
-.PHONY: help build up down logs restart clean test db-connect
+.PHONY: help build up down logs restart clean test db-connect publish
 
 # Default target
 help:
@@ -17,6 +17,7 @@ help:
 	@echo "  make test        - Test Newman executor"
 	@echo "  make dev         - Run Scout locally (requires local Postgres)"
 	@echo "  make build-go    - Build Scout binary"
+	@echo "  make publish     - Build, tag, and push Docker image to Docker Hub"
 
 # Build Docker images
 build:
@@ -85,6 +86,14 @@ dev:
 build-go:
 	go build -o scout ./cmd/scout
 	@echo "Binary built: scout"
+
+# Build, tag, and push Docker image to Docker Hub
+publish:
+	@echo "Building Docker image..."
+	docker build -f deployments/Dockerfile -t josepht96/scout-postman-monitor:v1.0.0 .
+	@echo "Pushing image to Docker Hub..."
+	docker push josepht96/scout-postman-monitor:v1.0.0
+	@echo "Successfully published josepht96/scout-postman-monitor:v1.0.0 to Docker Hub"
 
 # Install Newman dependencies
 install-newman:
