@@ -9,23 +9,21 @@ data:
   PORT: {{ .Values.scout.port | quote }}
   COLLECTIONS_DIR: {{ .Values.scout.collectionsDir | quote }}
   NEWMAN_SCRIPT_PATH: {{ .Values.scout.newmanScriptPath | quote }}
+{{- if .Values.scout.collections }}
+{{- range $collectionName, $collectionConfig := .Values.scout.collections }}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "scout.fullname" . }}-collections
+  name: {{ include "scout.fullname" $ }}-collections-{{ $collectionName }}
   labels:
-    {{- include "scout.labels" . | nindent 4 }}
+    {{- include "scout.labels" $ | nindent 4 }}
 data:
-  {{- if .Values.scout.collections }}
-  {{- range $collectionName, $collectionConfig := .Values.scout.collections }}
   {{- $path := printf "%s/*" $collectionConfig.path }}
   {{- range $filePath, $_ := $.Files.Glob $path }}
   {{- $fileName := base $filePath }}
-  {{ printf "%s/%s" $collectionName $fileName }}: |
+  {{ $fileName }}: |
 {{ $.Files.Get $filePath | indent 4 }}
   {{- end }}
-  {{- end }}
-  {{- else }}
-  .gitkeep: ""
-  {{- end }}
+{{- end }}
+{{- end }}

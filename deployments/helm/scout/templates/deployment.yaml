@@ -52,8 +52,12 @@ spec:
         - configMapRef:
             name: {{ include "scout.fullname" . }}-config
         volumeMounts:
-        - name: collections
-          mountPath: {{ .Values.scout.collectionsDir }}
+        {{- if .Values.scout.collections }}
+        {{- range $collectionName, $collectionConfig := .Values.scout.collections }}
+        - name: collections-{{ $collectionName }}
+          mountPath: {{ printf "%s/%s" $.Values.scout.collectionsDir $collectionName }}
+        {{- end }}
+        {{- end }}
         {{- with .Values.volumeMounts }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -68,9 +72,13 @@ spec:
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
       volumes:
-      - name: collections
+      {{- if .Values.scout.collections }}
+      {{- range $collectionName, $collectionConfig := .Values.scout.collections }}
+      - name: collections-{{ $collectionName }}
         configMap:
-          name: {{ include "scout.fullname" . }}-collections
+          name: {{ include "scout.fullname" $ }}-collections-{{ $collectionName }}
+      {{- end }}
+      {{- end }}
       {{- with .Values.volumes }}
       {{- toYaml . | nindent 6 }}
       {{- end }}
