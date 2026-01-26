@@ -18,7 +18,14 @@ metadata:
     {{- include "scout.labels" . | nindent 4 }}
 data:
   {{- if .Values.scout.collections }}
-  {{- toYaml .Values.scout.collections | nindent 2 }}
+  {{- range $collectionName, $collectionConfig := .Values.scout.collections }}
+  {{- $path := printf "%s/*" $collectionConfig.path }}
+  {{- range $filePath, $_ := $.Files.Glob $path }}
+  {{- $fileName := base $filePath }}
+  {{ printf "%s/%s" $collectionName $fileName }}: |
+{{ $.Files.Get $filePath | indent 4 }}
+  {{- end }}
+  {{- end }}
   {{- else }}
   .gitkeep: ""
   {{- end }}

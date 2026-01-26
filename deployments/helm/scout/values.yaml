@@ -121,9 +121,11 @@ scout:
   newmanScriptPath: "/app/newman/executor.js"
 
   # Collections can be provided as a configmap
-  collections: {}
-    # example.json: |
-    #   { "collection": "data" }
+  collections:
+    example:
+      path: files/example
+    example2:
+      path: files/example2
 
 # Database configuration
 database:
