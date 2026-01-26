@@ -1,5 +1,5 @@
 # Binaries
-scout
+./scout
 *.exe
 *.exe~
 *.dll

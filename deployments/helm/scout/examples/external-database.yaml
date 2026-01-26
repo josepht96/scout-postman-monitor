@@ -1,0 +1,41 @@
+# Example: Deployment with external database
+# Usage: helm install scout deployments/helm/scout -f examples/external-database.yaml
+
+# Disable internal PostgreSQL
+postgresql:
+  enabled: false
+
+# Configure external database
+database:
+  external:
+    enabled: true
+    # Set this to your actual database URL
+    url: "postgres://scout_user:password@db.external.example.com:5432/scout_prod?sslmode=require"
+
+# OpenShift Route configuration
+route:
+  enabled: true
+  host: "scout.production.example.com"
+  tls:
+    enabled: true
+    termination: edge
+
+# Production resources
+resources:
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+  requests:
+    cpu: 500m
+    memory: 512Mi
+
+# Enable autoscaling
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 75
+
+# Application configuration
+scout:
+  interval: "30s"

@@ -1,0 +1,31 @@
+# Example: Standard Kubernetes deployment with Ingress
+# Usage: helm install scout deployments/helm/scout -f examples/kubernetes-ingress.yaml
+
+# Disable OpenShift Route
+route:
+  enabled: false
+
+# Enable Ingress for standard Kubernetes
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+  hosts:
+    - host: scout.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: scout-tls
+      hosts:
+        - scout.example.com
+
+# Application configuration
+scout:
+  interval: "30s"
+
+# Use default PostgreSQL settings
+postgresql:
+  enabled: true

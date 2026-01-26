@@ -1,0 +1,92 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Your release is named {{ .Release.Name }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }}
+  $ helm get all {{ .Release.Name }}
+
+{{- if .Values.route.enabled }}
+
+Scout is accessible via OpenShift Route:
+
+{{- if .Values.route.host }}
+  URL: {{ if .Values.route.tls.enabled }}https{{ else }}http{{ end }}://{{ .Values.route.host }}{{ .Values.route.path }}
+{{- else }}
+  Get the auto-generated route hostname:
+  $ oc get route {{ include "scout.fullname" . }} -o jsonpath='{.spec.host}'
+
+  Then access Scout at:
+  $ echo "{{ if .Values.route.tls.enabled }}https{{ else }}http{{ end }}://$(oc get route {{ include "scout.fullname" . }} -o jsonpath='{.spec.host}')"
+{{- end }}
+
+{{- else if .Values.ingress.enabled }}
+
+Scout is accessible via Ingress:
+
+{{- range $host := .Values.ingress.hosts }}
+  {{- range .paths }}
+  URL: http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+  {{- end }}
+{{- end }}
+
+{{- else if contains "NodePort" .Values.service.type }}
+
+Scout is accessible via NodePort:
+
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "scout.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo "http://$NODE_IP:$NODE_PORT"
+
+{{- else if contains "LoadBalancer" .Values.service.type }}
+
+Scout is accessible via LoadBalancer:
+
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+        You can watch the status by running:
+
+  kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "scout.fullname" . }}
+
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "scout.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo "http://$SERVICE_IP:{{ .Values.service.port }}"
+
+{{- else if contains "ClusterIP" .Values.service.type }}
+
+Scout is accessible from within the cluster:
+
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "scout.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  echo "Visit http://127.0.0.1:8080 to use Scout"
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
+
+To expose Scout externally, consider enabling:
+- route.enabled=true for OpenShift
+- ingress.enabled=true for standard Kubernetes
+
+{{- end }}
+
+Health check endpoint: /health
+Metrics endpoint: /metrics
+
+{{- if .Values.postgresql.enabled }}
+
+PostgreSQL database is deployed as part of this release.
+Database connection details are automatically configured.
+
+{{- else }}
+
+Make sure your external database is configured correctly in:
+- database.external.url or
+- database.host, database.port, database.name, database.username, database.password
+
+{{- end }}
+
+To add Postman collections, update the values.yaml file:
+  scout:
+    collections:
+      my-collection.json: |
+        { "collection": "data" }
+
+Then upgrade the release:
+  $ helm upgrade {{ .Release.Name }} deployments/helm/scout -f values.yaml

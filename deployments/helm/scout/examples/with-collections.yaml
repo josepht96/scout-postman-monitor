@@ -1,0 +1,63 @@
+# Example: Deployment with Postman collections
+# Usage: helm install scout deployments/helm/scout -f examples/with-collections.yaml
+
+# OpenShift Route
+route:
+  enabled: true
+  host: ""  # Auto-generated hostname
+
+# Scout configuration with collections
+scout:
+  interval: "60s"
+
+  # Add your Postman collections here
+  collections:
+    api-health-check.json: |
+      {
+        "info": {
+          "name": "API Health Check",
+          "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+        },
+        "item": [
+          {
+            "name": "Health Check",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "https://api.example.com/health",
+                "protocol": "https",
+                "host": ["api", "example", "com"],
+                "path": ["health"]
+              }
+            }
+          }
+        ]
+      }
+
+    user-api-tests.json: |
+      {
+        "info": {
+          "name": "User API Tests",
+          "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+        },
+        "item": [
+          {
+            "name": "Get Users",
+            "request": {
+              "method": "GET",
+              "url": {
+                "raw": "https://api.example.com/users",
+                "protocol": "https",
+                "host": ["api", "example", "com"],
+                "path": ["users"]
+              }
+            }
+          }
+        ]
+      }
+
+# Use default PostgreSQL
+postgresql:
+  enabled: true
+  persistence:
+    size: 5Gi

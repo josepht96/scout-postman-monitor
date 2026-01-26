@@ -1,0 +1,191 @@
+# Default values for scout
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  registry: ""  # Optional container registry (e.g., my-registry.com, docker.io)
+  repository: scout
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  prometheus.io/path: "/metrics"
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+  annotations: {}
+
+# Ingress configuration for standard Kubernetes clusters
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: scout.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: scout-tls
+  #    hosts:
+  #      - scout.local
+
+# OpenShift Route configuration
+route:
+  enabled: true
+  host: ""  # Leave empty for auto-generated hostname, or specify your custom domain
+  path: ""
+  tls:
+    enabled: true
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  annotations: {}
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 30
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Scout application configuration
+scout:
+  interval: "30s"
+  port: "8080"
+  collectionsDir: "/app/collections"
+  newmanScriptPath: "/app/newman/executor.js"
+
+  # Collections can be provided as a configmap
+  collections: {}
+    # example.json: |
+    #   { "collection": "data" }
+
+# Database configuration
+database:
+  # Use external database or deploy PostgreSQL
+  external:
+    enabled: false
+    url: ""  # Full database URL: postgres://username:password@host:port/database?sslmode=disable
+
+  # Database credentials (used when external.enabled is false or when external.url is empty)
+  host: postgres
+  port: 5432
+  name: scout
+  username: postgres
+  password: postgres
+  sslmode: disable
+
+# PostgreSQL deployment (when not using external database)
+postgresql:
+  enabled: true
+  image:
+    registry: ""  # Optional container registry (e.g., my-registry.com, docker.io)
+    repository: postgres
+    tag: "15-alpine"
+    pullPolicy: IfNotPresent
+
+  persistence:
+    enabled: true
+    storageClass: ""  # Use default storage class
+    accessMode: ReadWriteOnce
+    size: 5Gi
+
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+  # PostgreSQL configuration
+  config:
+    pgdata: /var/lib/postgresql/data/pgdata
+
+  livenessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+# Environment variables
+env: []
+  # - name: CUSTOM_VAR
+  #   value: "custom_value"
+
+# Additional volumes
+volumes: []
+  # - name: custom-volume
+  #   emptyDir: {}
+
+# Additional volume mounts
+volumeMounts: []
+  # - name: custom-volume
+  #   mountPath: /custom/path

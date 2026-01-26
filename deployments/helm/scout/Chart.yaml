@@ -1,0 +1,15 @@
+apiVersion: v2
+name: scout
+description: A Helm chart for Scout Postman Monitor - automated Postman collection runner with PostgreSQL backend
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - postman
+  - monitoring
+  - newman
+  - api-testing
+home: https://github.com/yourorg/scout-postman-monitor
+maintainers:
+  - name: Scout Team
+    email: team@example.com
