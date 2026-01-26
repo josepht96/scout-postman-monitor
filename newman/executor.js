@@ -95,7 +95,8 @@ const result = {
 // Run Newman
 const runOptions = {
   collection: collectionData,
-  reporters: [] // We'll handle reporting ourselves
+  reporters: [], // We'll handle reporting ourselves
+  insecure: true // Disable TLS/SSL certificate verification
 };
 
 // Add environment if provided

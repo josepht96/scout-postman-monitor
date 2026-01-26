@@ -1,30 +1,14 @@
 {{- if .Values.postgresql.enabled }}
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: {{ include "scout.postgresql.fullname" . }}-pvc
-  labels:
-    {{- include "scout.labels" . | nindent 4 }}
-    app.kubernetes.io/component: database
-spec:
-  accessModes:
-    - {{ .Values.postgresql.persistence.accessMode }}
-  {{- if .Values.postgresql.persistence.storageClass }}
-  storageClassName: {{ .Values.postgresql.persistence.storageClass | quote }}
-  {{- end }}
-  resources:
-    requests:
-      storage: {{ .Values.postgresql.persistence.size }}
----
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ include "scout.postgresql.fullname" . }}
   labels:
     {{- include "scout.labels" . | nindent 4 }}
     app.kubernetes.io/component: database
 spec:
+  serviceName: {{ include "scout.postgresql.fullname" . }}
   replicas: 1
   selector:
     matchLabels:
@@ -74,14 +58,28 @@ spec:
           periodSeconds: {{ .Values.postgresql.readinessProbe.periodSeconds }}
         resources:
           {{- toYaml .Values.postgresql.resources | nindent 10 }}
+      {{- if not .Values.postgresql.persistence.enabled }}
       volumes:
       - name: postgres-storage
-        {{- if .Values.postgresql.persistence.enabled }}
-        persistentVolumeClaim:
-          claimName: {{ include "scout.postgresql.fullname" . }}-pvc
-        {{- else }}
         emptyDir: {}
-        {{- end }}
+      {{- end }}
+  {{- if .Values.postgresql.persistence.enabled }}
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-storage
+      labels:
+        {{- include "scout.labels" . | nindent 8 }}
+        app.kubernetes.io/component: database
+    spec:
+      accessModes:
+        - {{ .Values.postgresql.persistence.accessMode }}
+      {{- if .Values.postgresql.persistence.storageClass }}
+      storageClassName: {{ .Values.postgresql.persistence.storageClass | quote }}
+      {{- end }}
+      resources:
+        requests:
+          storage: {{ .Values.postgresql.persistence.size }}
+  {{- end }}
 ---
 apiVersion: v1
 kind: Service
