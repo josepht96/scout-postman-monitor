@@ -90,10 +90,10 @@ build-go:
 # Build, tag, and push Docker image to Docker Hub
 publish:
 	@echo "Building Docker image for linux/amd64..."
-	docker build --platform linux/amd64 -f deployments/Dockerfile -t josepht96/scout-postman-monitor:v1.0.0 .
+	docker build --platform linux/amd64 -f deployments/Dockerfile -t josepht96/scout-postman-monitor:v1.0.1 .
 	@echo "Pushing image to Docker Hub..."
-	docker push josepht96/scout-postman-monitor:v1.0.0
-	@echo "Successfully published josepht96/scout-postman-monitor:v1.0.0 to Docker Hub"
+	docker push josepht96/scout-postman-monitor:v1.0.1
+	@echo "Successfully published josepht96/scout-postman-monitor:v1.0.1 to Docker Hub"
 
 # Install Newman dependencies
 install-newman:

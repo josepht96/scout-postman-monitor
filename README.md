@@ -1,8 +1,16 @@
 # Scout - Postman Test Monitoring
 
-## Note: Image is not yet published. Use `make rebuild-scout` to build and run locally
-
 Scout is a monitoring tool that executes Postman collections using Newman, stores test results in PostgreSQL, exposes Prometheus metrics, and provides a simple web UI for visualization.
+
+## TL:DR
+
+Run containers locally using docker-compose, access at localhost:8080:
+
+```bash
+make up
+```
+
+Note: ports 8080 and 5432 need to be free
 
 ## Features
 

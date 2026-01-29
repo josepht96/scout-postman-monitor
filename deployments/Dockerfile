@@ -36,7 +36,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Install runtime dependencies
-RUN apk add --no-cache ca-certificates tzdata
+RUN apk add --no-cache ca-certificates tzdata curl
 
 # Copy Node.js dependencies from node-builder
 COPY --from=node-builder /app/newman /app/newman
