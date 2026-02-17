@@ -232,6 +232,13 @@
             color: #3730a3;
         }
 
+        .collection-test-count {
+            color: #ffffff;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
         .collection-meta {
             padding: 15px 20px;
             background: #252525;
@@ -604,7 +611,10 @@
                                 <span class="collapse-icon"></span>
                                 ${col.collection.name}
                             </div>
-                            <div class="collection-status ${status}">${status.toUpperCase()}</div>
+                            <div style="display: flex; align-items: center;">
+                                ${exec ? '<div class="collection-test-count">' + exec.passed_tests + '/' + exec.total_tests + '</div>' : ''}
+                                <div class="collection-status ${status}">${status.toUpperCase()}</div>
+                            </div>
                         </div>
                         <div class="collection-content">
                             <div class="collection-meta">
